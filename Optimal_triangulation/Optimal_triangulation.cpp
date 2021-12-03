@@ -139,19 +139,16 @@ void get_Triangulation2(eNodeB* a, int size) {
             j = i + r - 1;
             f[i][j] = -1;//初始化最小值为负数
             p[i][j] = i;
-            int k[3];
             int z = j - i;
-            k[0] = i + z / 4;
-            k[1] = i + z / 2;
-            k[2] = i + z * 3 / 4;
-            for (int w = 0; w < 3; ++w) {
-                double v = f[i][k[w]] + f[k[w] + 1][j];
-                v += a[i - 1] - a[k[w]];
-                v += a[j] - a[k[w]];
+            for (int w = 1; w < 4; ++w) {
+                int k = i + z * w / 4;
+                double v = f[i][k] + f[k + 1][j];
+                v += a[i - 1] - a[k];
+                v += a[j] - a[k];
                 v += a[i - 1] - a[j];
                 if (f[i][j]<0 || f[i][j]>v) {
                     f[i][j] = v;
-                    p[i][j] = k[w];
+                    p[i][j] = k;
                 }
             }
         }
@@ -160,7 +157,6 @@ void get_Triangulation2(eNodeB* a, int size) {
     std::cout << "O(n^2)查找三角剖分的权函数值为" << std::setprecision(10) << f[1][size - 1] << std::endl;
     std::cout << "每个三角的三个点的序号如下:" << std::endl;
     getSplitP(p, 1, size - 1);
-    std::cout << std::endl;
     std::cout << "运行时间为 " << clock() - start_time << "ms" << std::endl;
 
     for (int i = 0; i < size + 1; ++i)delete[]f[i];
