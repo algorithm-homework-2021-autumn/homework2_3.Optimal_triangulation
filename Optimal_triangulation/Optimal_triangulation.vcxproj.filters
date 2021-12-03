@@ -19,4 +19,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="polygon_data1.txt">
+      <Filter>资源文件</Filter>
+    </Text>
+    <Text Include="polygon_data2.txt">
+      <Filter>资源文件</Filter>
+    </Text>
+  </ItemGroup>
 </Project>

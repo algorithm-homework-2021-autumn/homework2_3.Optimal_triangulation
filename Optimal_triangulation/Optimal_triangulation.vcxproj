@@ -141,6 +141,10 @@
   <ItemGroup>
     <ClCompile Include="Optimal_triangulation.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="polygon_data1.txt" />
+    <Text Include="polygon_data2.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

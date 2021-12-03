@@ -56,10 +56,11 @@ public:
         order = b.order;
     }
 };
-/*
-* void get_polygon_data(eNodeB** a, int* size)
-* 从文件读取凸多边形数据
-*/
+void get_polygon_data(eNodeB** a, int* size); //从文件读取凸多边形数据
+void getSplitP(int** s, int l, int r); //递归查找并输出每个多边形的剖分点
+void get_Triangulation1(eNodeB* a, int size); //O(n^3)求凸多边形的最优三角剖分
+void get_Triangulation2(eNodeB* a, int size); //O(n^2)求凸多边形的三角剖分
+
 void get_polygon_data(eNodeB** a, int* size) {//从文件读取凸多边形数据
     std::ifstream Data;
     for (int i = 0; i < data_size; ++i) {
@@ -84,12 +85,9 @@ void getSplitP(int** s, int l, int r) {
     getSplitP(s, s[l][r] + 1, r);
 
 }
-/*
-* void get_Triangulation(eNodeB* a, int size)
-* 求凸多边形的最优三角剖分
-* a为顺时针储存的凸多边形的n个顶点，size为凸多边形顶点数
-*/
-void get_Triangulation(eNodeB* a, int size) {
+void get_Triangulation1(eNodeB* a, int size) {
+    std::cout << "多边形顶点数为 " << size << std::endl;
+    int start_time = clock();
     double** f = new double* [size + 1]; 
     for (int i = 0; i < size + 1; ++i)f[i] = new double[size + 1];
     int** p = new int* [size + 1];
@@ -115,15 +113,61 @@ void get_Triangulation(eNodeB* a, int size) {
         }
     }
 
-    std::cout << "最优三角剖分的权函数值为" << std::setprecision(10) << f[1][size - 1] << std::endl;
+    std::cout << "O(n^3)查找最优三角剖分的权函数值为" << std::setprecision(10) << f[1][size - 1] << std::endl;
     std::cout << "每个最优三角的三个点的序号如下:"<<std::endl;
     getSplitP(p, 1, size - 1);
-    std::cout << std::endl;
+    std::cout << "运行时间为 " << clock() - start_time << "ms" << std::endl;
 
     for (int i = 0; i < size + 1; ++i)delete[]f[i];
     delete[]f; 
     for (int i = 0; i < size + 1; ++i)delete[]p[i];
     delete[]p;
+    std::cout << std::endl; 
+}
+void get_Triangulation2(eNodeB* a, int size) {
+    std::cout << "多边形顶点数为 " << size << std::endl;
+    int start_time = clock();
+    double** f = new double* [size + 1];
+    for (int i = 0; i < size + 1; ++i)f[i] = new double[size + 1];
+    int** p = new int* [size + 1];
+    for (int i = 0; i < size + 1; ++i)p[i] = new int[size + 1];
+    //f[i][j]为凸子多边形{ vi - 1,vi,…,vj }的最优三角剖分所对应的权函数值
+    //p[i][j]最优三角剖分取的分割点
+    for (int i = 0; i < size; ++i)f[i][i] = 0;
+    for (int r = 2; r < size; ++r) {
+        for (int i = 1, j; i < size - r + 1; ++i) {
+            j = i + r - 1;
+            f[i][j] = -1;//初始化最小值为负数
+            p[i][j] = i;
+            int k[3];
+            int z = j - i;
+            k[0] = i + z / 4;
+            k[1] = i + z / 2;
+            k[2] = i + z * 3 / 4;
+            for (int w = 0; w < 3; ++w) {
+                double v = f[i][k[w]] + f[k[w] + 1][j];
+                v += a[i - 1] - a[k[w]];
+                v += a[j] - a[k[w]];
+                v += a[i - 1] - a[j];
+                if (f[i][j]<0 || f[i][j]>v) {
+                    f[i][j] = v;
+                    p[i][j] = k[w];
+                }
+            }
+        }
+    }
+
+    std::cout << "O(n^2)查找三角剖分的权函数值为" << std::setprecision(10) << f[1][size - 1] << std::endl;
+    std::cout << "每个三角的三个点的序号如下:" << std::endl;
+    getSplitP(p, 1, size - 1);
+    std::cout << std::endl;
+    std::cout << "运行时间为 " << clock() - start_time << "ms" << std::endl;
+
+    for (int i = 0; i < size + 1; ++i)delete[]f[i];
+    delete[]f;
+    for (int i = 0; i < size + 1; ++i)delete[]p[i];
+    delete[]p;
+    std::cout << std::endl;
 }
 int main(){
     //new凸多边形数据数组和储存每组多边形点数的数组
@@ -137,7 +181,9 @@ int main(){
     //求每组数据的最优三角剖分
     for (int i = 0; i < data_size; ++i) {
         std::cout << "计算第" << i + 1 << "组凸多边形的最优三角剖分如下" << std::endl;
-        get_Triangulation(a[i], size[i]);
+        get_Triangulation1(a[i], size[i]);
+        std::cout << "O(n^2)计算第" << i + 1 << "组凸多边形的三角剖分如下" << std::endl;
+        get_Triangulation2(a[i], size[i]);
     }
 
     //delete分配的动态空间
